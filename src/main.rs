@@ -2,8 +2,14 @@ use std::env::args;
 use std::io::{self, stdout, BufRead, Write};
 
 mod error_handling;
+use error_handling::*;
 
 mod token_type;
+
+mod lexer;
+use lexer::*;
+
+mod token;
 
 fn main() {
     let args: Vec<String> = args().collect();
@@ -20,7 +26,7 @@ fn main() {
 
 fn run_file(path: &String) -> io::Result<()> {
     let buffer: String = std::fs::read_to_string(path)?;
-    match run(&buffer) {
+    match run(buffer) {
         Ok(_) => {}
         Err(lox_error) => {
             lox_error.report("".to_string());
@@ -40,7 +46,7 @@ fn run_prompt() {
         if line.is_empty() {
             break;
         };
-        match run(line.as_str()) {
+        match run(line) {
             Ok(_) => {}
             Err(lox_error) => {
                 lox_error.report("".to_string());
@@ -49,13 +55,13 @@ fn run_prompt() {
     }
 }
 
-fn run(_source: &str) -> Result<(), error_handling::LoxError> {
-    // let mut lexer = Lexer::new(source);
-    // let tokens = lexer.eval_tokens()?;
+fn run(source: String) -> Result<(), LoxError> {
+    let mut lexer = Lexer::new(source);
+    let tokens = lexer.eval_tokens()?;
 
-    // for token in tokens {
-    //   println!("{:?}", token)
-    // }
+    for token in tokens {
+      println!("{:?}", token)
+    }
 
     Ok(())
 }

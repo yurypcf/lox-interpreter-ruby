@@ -11,7 +11,7 @@ pub enum Object {
 }
 
 impl fmt::Display for Object {
-  fn fmt(self, f: &mut fmt::Formatter) -> Fmt::Result {
+  fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
     match self {
       Object::Num(x) => write!(f, "{x}"),
       Object::Str(x) => write!(f, "\"{x}\""),
@@ -31,13 +31,13 @@ pub struct Token {
 }
 
 impl fmt::Display for Token {
-  fn fmt(self, f: &mut fmt::Formatter) -> Fmt::Result {
+  fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
     write!(
       f,
       "{:?} {} {}",
       self.ttype,
       self.lexeme,
-      if let Some(literal) = self.literal {
+      if let Some(literal) = &self.literal {
         literal.to_string()
       } else {
         "None".to_string()
@@ -56,7 +56,7 @@ impl Token {
     }
   }
 
-  fn eof(&self, line: usize) {
+  pub fn eof(line: usize) -> Token {
     Token { ttype: TokenType::Eof, lexeme: "".to_string(), literal: None, line }
   }
 }

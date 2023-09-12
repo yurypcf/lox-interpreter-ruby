@@ -24,24 +24,46 @@ impl Lexer {
     pub fn eval_tokens(&mut self) -> Result<&Vec<Token>, LoxError> {
       while !self.end_of_source() {
         self.start = self.current;
-        self.eval_token();
+        match self.eval_token() {
+          Ok(_) => {},
+          Err(e) => {
+            e.report("".to_string())
+          }
+        }
       }
 
       self.tokens.push(Token::eof(self.line));
-    }
-    
-    fn end_of_source(&self) {
-      self.current >= self.source.len();
+
+      Ok(&self.tokens)
     }
 
-    fn eval_token(&mut self) {
+    fn end_of_source(&self) -> bool {
+      self.current >= self.source.len()
+    }
+
+    fn eval_token(&mut self) -> Result<(), LoxError>{
       let c = self.eat();
       match c {
-        "(" => self.add_token(TokenType::LeftParen),
+        '(' => self.add_token(TokenType::LeftParen),
+        ')' => self.add_token(TokenType::RightParen),
+        '{' => self.add_token(TokenType::LeftBrace),
+        '}' => self.add_token(TokenType::RightBrace),
+        ',' => self.add_token(TokenType::Comma),
+        '.' => self.add_token(TokenType::Dot),
+        '-' => self.add_token(TokenType::Minus),
+        '+' => self.add_token(TokenType::Plus),
+        ';' => self.add_token(TokenType::Semicolon),
+        '/' => self.add_token(TokenType::Slash),
+        '*' => self.add_token(TokenType::Star),
         _   => {
-          unreachable!("Unmatched token type to char!")
+          return Err(LoxError::error(
+            self.line,
+            "Unexpected character".to_string()
+          ));
         }
       }
+
+      Ok(())
     }
 
     fn eat(&mut self) -> char {
@@ -50,8 +72,13 @@ impl Lexer {
       result
     }
 
-    fn add_token() {
-      todo!()
+    fn add_token(&mut self, ttype: TokenType) {
+      self.add_token_object(ttype, None)
+    }
+
+    fn add_token_object(&mut self, ttype: TokenType, literal: Option<Object>) {
+      let lexeme: String = self.source[self.start..self.current].iter().collect();
+      self.tokens.push(Token::new(ttype, lexeme, literal, self.line))
     }
 }
 
